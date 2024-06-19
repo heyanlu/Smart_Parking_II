@@ -1,26 +1,25 @@
 package com.example.demo.Smart_Parking.service;
 
-
 import com.example.demo.Smart_Parking.model.Member;
 import com.example.demo.Smart_Parking.model.MemberType;
 import com.example.demo.Smart_Parking.model.ParkingLot;
 import com.example.demo.Smart_Parking.model.Vehicle;
-import com.example.demo.Smart_Parking.model.VehicleType;
 import com.example.demo.Smart_Parking.repository.MemberRepository;
 import com.example.demo.Smart_Parking.repository.ParkingLotRepository;
 import com.example.demo.Smart_Parking.repository.VehicleRepository;
-import com.example.demo.Smart_Parking.service.ParkingFeeCalculator;
+import org.springframework.stereotype.Service;
+import org.json.JSONObject;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
+
+
 @Service
-public class ParkingService {
+public class ParkingService implements IParkingService{
 
   private VehicleRepository vehicleRepository;
   private MemberRepository memberRepository;
@@ -34,12 +33,14 @@ public class ParkingService {
     this.parkingLotRepository = parkingLotRepository;
   }
 
-  // Customer - Park a vehicle by license plate
+   //Customer - Park a vehicle by license plate
+  @Override
   public String parkVehicle(Vehicle vehicle) {
     Optional<ParkingLot> optionalParkingLot = parkingLotRepository.findFirstByParkingPositionsContains(false);
     if (optionalParkingLot.isEmpty()) {
       throw new RuntimeException("No available parking spots");
     }
+
 
     ParkingLot parkingLot = optionalParkingLot.get();
     Integer parkingPosition = parkingLot.findAvailablePositionAndPark();
@@ -51,26 +52,28 @@ public class ParkingService {
 
     vehicleRepository.save(vehicle);
 
-    return "Welcome, " + vehicle.getLicensePlate() + " . Your parking position: " + parkingPosition;
+    return "success";
 
   }
 
-  public String processPayment(String licensePlate) {
-    Optional<Vehicle> optionalVehicle = vehicleRepository.findByLicensePlate(licensePlate);
+  @Override
+  public String processPayment(String licensePlateJson) {
+    Optional<Vehicle> optionalVehicle = vehicleRepository.findByLicensePlate(licensePlateJson);
+
     if (optionalVehicle.isPresent()) {
       Vehicle vehicle = optionalVehicle.get();
+
       LocalDateTime startTime = vehicle.getArrivalTime();
       LocalDateTime endTime = LocalDateTime.now();
 
       Duration duration = Duration.between(startTime, endTime);
       float parkingFee = ParkingFeeCalculator.calculateParkingFee(duration);
 
-      Optional<Member> optionalMember = memberRepository.findByLicensePlate(licensePlate);
+      Optional<Member> optionalMember = memberRepository.findByLicensePlate(licensePlateJson);
       boolean isMember = optionalMember.isPresent();
 
       String paymentConfirmation;
       if (isMember) {
-        parkingFee = 0.0f;
         paymentConfirmation = "Payment successful!";
       } else if (parkingFee != 0.0f) {
         paymentConfirmation = "Payment successful!";
@@ -87,11 +90,11 @@ public class ParkingService {
         throw new RuntimeException("Payment processing failed. Please try again.");
       }
     } else {
-      throw new RuntimeException("Vehicle not found with license plate: " + licensePlate);
+      return "vehicle not found with license plate: " + licensePlateJson.toString();
     }
   }
 
-
+  @Override
   public String processToLeave(String licensePlate) {
     Optional<Vehicle> optionalVehicle = vehicleRepository.findByLicensePlate(licensePlate);
     if (optionalVehicle.isPresent()) {
@@ -159,25 +162,37 @@ public class ParkingService {
     return String.format("%02d:%02d:%02d", hours, minutes, seconds);
   }
 
-
-  // Admin - Get all vehicles
+  @Override
   public List<Vehicle> getAllVehicles() {
     return vehicleRepository.findAll();
   }
 
-  // Admin - Add a member
-  public void addMember(String licensePlate, MemberType memberType) {
+  @Override
+  public void addMember(String memberInfoJson) {
+    JSONObject jsonObj = new JSONObject(memberInfoJson);
+
+    String licensePlate = jsonObj.getString("licensePlate");
+    String memberTypeStr = jsonObj.getString("memberType");
+
+    MemberType memberType = MemberType.valueOf(memberTypeStr);
+
     Member member = new Member();
     member.setLicensePlate(licensePlate);
     member.setMemberType(memberType);
     member.setMemberStartTime(LocalDateTime.now());
 
-    if (memberType == MemberType.YEARLY) {
-      member.setMemberEndTime(LocalDateTime.now().plusYears(1));
-    } else if (memberType == MemberType.MONTHLY) {
-      member.setMemberEndTime(LocalDateTime.now().plusMonths(1));
-    } else if (memberType == MemberType.WEEKLY) {
-      member.setMemberEndTime(LocalDateTime.now().plusWeeks(1));
+    switch (memberType) {
+      case YEARLY:
+        member.setMemberEndTime(LocalDateTime.now().plusYears(1));
+        break;
+      case MONTHLY:
+        member.setMemberEndTime(LocalDateTime.now().plusMonths(1));
+        break;
+      case WEEKLY:
+        member.setMemberEndTime(LocalDateTime.now().plusWeeks(1));
+        break;
+      default:
+        break;
     }
 
     memberRepository.save(member);
@@ -185,17 +200,20 @@ public class ParkingService {
 
 
   // Delete a member manually
-  public void deleteMember(String licensePlate) {
-    Optional<Member> memberOptional = memberRepository.findByLicensePlate(licensePlate);
+  @Override
+  public String deleteMember(String licensePlateJson) {
+    Optional<Member> memberOptional = memberRepository.findByLicensePlate(licensePlateJson.toString());
     if (memberOptional.isPresent()) {
       memberRepository.delete(memberOptional.get());
+      return "success";
+
     } else {
-      throw new RuntimeException("Member not found with license plate: " + licensePlate);
+      return "Member not found with this license plate";
     }
   }
 
 
-  // Delete a member automatically
+  @Override
   @Scheduled(cron = "0 0 0 * * ?")
   public void checkMembershipEndTimes() {
     LocalDateTime now = LocalDateTime.now();
@@ -206,6 +224,12 @@ public class ParkingService {
       System.out.println("Member with ID " + member.getId() + " has expired.");
     }
   }
+
+  @Override
+  public List<Member> getAllMember() {
+    return memberRepository.findAll();
+  }
+
 
 }
 

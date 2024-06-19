@@ -2,13 +2,10 @@ package com.example.demo.Smart_Parking;
 
 import com.example.demo.Smart_Parking.model.ParkingLot;
 import com.example.demo.Smart_Parking.model.Vehicle;
-import com.example.demo.Smart_Parking.model.VehicleType;
 import com.example.demo.Smart_Parking.repository.ParkingLotRepository;
 import com.example.demo.Smart_Parking.repository.VehicleRepository;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,8 +32,8 @@ public class ParkingConfig {
           "ABC124",
           1,
           LocalDateTime.now(),
-          LocalDateTime.now(),
-          LocalDateTime.now()
+          null,
+          null
       );
 
       vehicleRepository.saveAll(List.of(vehicle1, vehicle2));

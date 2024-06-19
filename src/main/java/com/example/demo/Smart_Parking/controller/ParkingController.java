@@ -1,6 +1,8 @@
 package com.example.demo.Smart_Parking.controller;
 
+import com.example.demo.Smart_Parking.model.LicensePlateRequest;
 import com.example.demo.Smart_Parking.model.Member;
+import com.example.demo.Smart_Parking.model.ResponseMessage;
 import com.example.demo.Smart_Parking.model.Vehicle;
 import com.example.demo.Smart_Parking.service.ParkingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/smart_parking")
+@CrossOrigin(origins = "http://localhost:5174")
 public class ParkingController {
 
   private final ParkingService parkingService;
@@ -21,22 +24,24 @@ public class ParkingController {
   }
 
   @PostMapping("/park")
-  public ResponseEntity<Object> parkVehicle(@RequestBody String licensePlate) {
-    Vehicle vehicle = new Vehicle();
-    vehicle.setLicensePlate(licensePlate);
-
-    String parkedVehicle = parkingService.parkVehicle(vehicle);
-    return ResponseEntity.ok(parkedVehicle);
+  public ResponseEntity<Object> parkVehicle(@RequestBody Vehicle vehicle) {
+    String result = parkingService.parkVehicle(vehicle);
+    ResponseMessage response = new ResponseMessage(result);
+    return ResponseEntity.ok(response);
   }
 
   @PostMapping("/process-payment")
-  public ResponseEntity<String> processPayment(@RequestBody String licensePlate) {
+  public ResponseEntity<String> processPayment(@RequestBody LicensePlateRequest request) {
+    String licensePlate = request.getLicensePlate();
+
     String paymentResult = parkingService.processPayment(licensePlate);
     return ResponseEntity.ok(paymentResult);
   }
 
   @PostMapping("/process-to-leave")
-  public ResponseEntity<String> processToLeave(@RequestBody String licensePlate) {
+  public ResponseEntity<String> processToLeave(@RequestBody LicensePlateRequest request) {
+    String licensePlate = request.getLicensePlate();
+
     String paymentResult = parkingService.processToLeave(licensePlate);
     return ResponseEntity.ok(paymentResult);
   }
@@ -48,8 +53,8 @@ public class ParkingController {
   }
 
   @PostMapping("/add-member")
-  public ResponseEntity<String> addMember(@RequestBody Member member) {
-    parkingService.addMember(member.getLicensePlate(), member.getMemberType());
+  public ResponseEntity<String> addMember(@RequestBody String memberInfoJson) {
+    parkingService.addMember(memberInfoJson);
     return ResponseEntity.ok("Member added successfully");
   }
 
@@ -64,4 +69,10 @@ public class ParkingController {
     parkingService.checkMembershipEndTimes();
     return "Membership check triggered successfully";
   }
+
+  @GetMapping("/all-member")
+  public List<Member> getAllMember() {
+    return parkingService.getAllMember();
+  }
+
 }
