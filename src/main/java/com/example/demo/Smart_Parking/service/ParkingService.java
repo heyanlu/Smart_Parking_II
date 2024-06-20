@@ -7,6 +7,8 @@ import com.example.demo.Smart_Parking.model.Vehicle;
 import com.example.demo.Smart_Parking.repository.MemberRepository;
 import com.example.demo.Smart_Parking.repository.ParkingLotRepository;
 import com.example.demo.Smart_Parking.repository.VehicleRepository;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.json.JSONObject;
 import java.time.Duration;
@@ -35,30 +37,40 @@ public class ParkingService implements IParkingService{
 
    //Customer - Park a vehicle by license plate
   @Override
-  public String parkVehicle(Vehicle vehicle) {
+  public Map<String, Object> parkVehicle(String licensePlate) {
     Optional<ParkingLot> optionalParkingLot = parkingLotRepository.findFirstByParkingPositionsContains(false);
-    if (optionalParkingLot.isEmpty()) {
-      throw new RuntimeException("No available parking spots");
-    }
 
+    Map<String, Object> response = new HashMap<>();
+
+    if (optionalParkingLot.isEmpty()) {
+      response.put("status", "failure");
+      response.put("message", "No available parking spots. ");
+    }
 
     ParkingLot parkingLot = optionalParkingLot.get();
     Integer parkingPosition = parkingLot.findAvailablePositionAndPark();
 
     parkingLotRepository.save(parkingLot);
 
+    //
+    Vehicle vehicle = new Vehicle();
+    vehicle.setLicensePlate(licensePlate);
+
     vehicle.setArrivalTime(LocalDateTime.now());
     vehicle.setParkingPosition(parkingPosition);
 
     vehicleRepository.save(vehicle);
 
-    return "success";
-
+    response.put("status", "success");
+    response.put("message", "Vehicle parked successfully. ");
+    return response;
   }
 
   @Override
-  public String processPayment(String licensePlateJson) {
-    Optional<Vehicle> optionalVehicle = vehicleRepository.findByLicensePlate(licensePlateJson);
+  public Map<String, Object> processPayment(String licensePlate) {
+    Optional<Vehicle> optionalVehicle = vehicleRepository.findByLicensePlate(licensePlate);
+
+    Map<String, Object> response = new HashMap<>();
 
     if (optionalVehicle.isPresent()) {
       Vehicle vehicle = optionalVehicle.get();
@@ -69,34 +81,44 @@ public class ParkingService implements IParkingService{
       Duration duration = Duration.between(startTime, endTime);
       float parkingFee = ParkingFeeCalculator.calculateParkingFee(duration);
 
-      Optional<Member> optionalMember = memberRepository.findByLicensePlate(licensePlateJson);
+      Optional<Member> optionalMember = memberRepository.findByLicensePlate(licensePlate);
       boolean isMember = optionalMember.isPresent();
 
       String paymentConfirmation;
-      if (isMember) {
-        paymentConfirmation = "Payment successful!";
-      } else if (parkingFee != 0.0f) {
+      if (isMember || parkingFee != 0.0f) {
         paymentConfirmation = "Payment successful!";
       } else {
-        paymentConfirmation = "Payment not required.";
+        paymentConfirmation = "Payment successful!";
       }
 
       if ("Payment successful!".equals(paymentConfirmation) || "Payment not required.".equals(paymentConfirmation)) {
         vehicle.setPaymentTime(LocalDateTime.now());
         vehicleRepository.save(vehicle);
 
-        return paymentConfirmation + " Please leave within 20 minutes.";
+        String formattedDuration = formatDuration(duration);
+
+        response.put("status", "success");
+        response.put("duration", formattedDuration);
+        response.put("fee", parkingFee);
+        response.put("message", paymentConfirmation);
       } else {
-        throw new RuntimeException("Payment processing failed. Please try again.");
+        response.put("status", "failure");
+        response.put("message", "Payment processing failed. Please try again. ");
       }
     } else {
-      return "vehicle not found with license plate: " + licensePlateJson.toString();
+      response.put("status", "failure");
+      response.put("message", "Vehicle with this license plate not found. ");
     }
+    return response;
+
   }
 
   @Override
-  public String processToLeave(String licensePlate) {
+  public Map<String, Object> processToLeave(String licensePlate) {
     Optional<Vehicle> optionalVehicle = vehicleRepository.findByLicensePlate(licensePlate);
+
+    Map<String, Object> response = new HashMap<>();
+
     if (optionalVehicle.isPresent()) {
       Vehicle vehicle = optionalVehicle.get();
 
@@ -115,13 +137,11 @@ public class ParkingService implements IParkingService{
       float parkingFee = ParkingFeeCalculator.calculateParkingFee(duration);
 
       String paymentConfirmation;
-      if (isMember) {
-        parkingFee = 0.0f;
-        paymentConfirmation = "Payment successful!";
-      } else if (parkingFee != 0.0f) {
-        paymentConfirmation = "Payment successful!";
-      } else {
+      if (isMember || parkingFee == 0.0f) {
         paymentConfirmation = "Payment not required.";
+      } else {
+        //mimic the payment is successful
+        paymentConfirmation = "Payment successful!";
       }
 
       if ("Payment successful!".equals(paymentConfirmation) || "Payment not required.".equals(paymentConfirmation)) {
@@ -141,16 +161,18 @@ public class ParkingService implements IParkingService{
           parkingLotRepository.save(parkingLot);
         }
         vehicleRepository.delete(vehicle);
+        response.put("status", "success");
+        response.put("message", paymentConfirmation);
 
-        String formattedDuration = formatDuration(duration);
-
-        return "Parking Duration: " + formattedDuration + ". " + paymentConfirmation + " See you next time!";
       } else {
-        throw new RuntimeException("Payment processing failed. Please try again.");
+        response.put("status", "failure");
+        response.put("message", "Payment processing failed. Please try again.");
       }
     } else {
-      throw new RuntimeException("Vehicle not found with license plate: " + licensePlate);
+      response.put("status", "failure");
+      response.put("message", "Vehicle with this license plate not found. ");
     }
+    return response;
   }
 
 
@@ -168,14 +190,7 @@ public class ParkingService implements IParkingService{
   }
 
   @Override
-  public void addMember(String memberInfoJson) {
-    JSONObject jsonObj = new JSONObject(memberInfoJson);
-
-    String licensePlate = jsonObj.getString("licensePlate");
-    String memberTypeStr = jsonObj.getString("memberType");
-
-    MemberType memberType = MemberType.valueOf(memberTypeStr);
-
+  public Map<String, Object> addMember(String licensePlate, MemberType memberType) {
     Member member = new Member();
     member.setLicensePlate(licensePlate);
     member.setMemberType(memberType);
@@ -196,20 +211,30 @@ public class ParkingService implements IParkingService{
     }
 
     memberRepository.save(member);
+    Map<String, Object> response = new HashMap<>();
+    response.put("status", "success");
+    response.put("terminate", member.getMemberEndTime());
+    response.put("message", "Member added");
+
+    return response;
   }
 
 
   // Delete a member manually
   @Override
-  public String deleteMember(String licensePlateJson) {
-    Optional<Member> memberOptional = memberRepository.findByLicensePlate(licensePlateJson.toString());
+  public Map<String, Object> deleteMember(String licensePlate) {
+    Optional<Member> memberOptional = memberRepository.findByLicensePlate(licensePlate);
+    Map<String, Object> response = new HashMap<>();
+
     if (memberOptional.isPresent()) {
       memberRepository.delete(memberOptional.get());
-      return "success";
-
+      response.put("status", "success");
+      response.put("message", "Membership deleted.");
     } else {
-      return "Member not found with this license plate";
+      response.put("status", "failure");
+      response.put("message", "Member not found with this license plate");
     }
+    return response;
   }
 
 

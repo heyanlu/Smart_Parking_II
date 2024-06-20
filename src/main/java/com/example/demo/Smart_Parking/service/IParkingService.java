@@ -1,20 +1,22 @@
 package com.example.demo.Smart_Parking.service;
 
 import com.example.demo.Smart_Parking.model.Member;
+import com.example.demo.Smart_Parking.model.MemberType;
 import com.example.demo.Smart_Parking.model.Vehicle;
 import java.util.List;
+import java.util.Map;
 
 public interface IParkingService {
-  String parkVehicle(Vehicle vehicle);
+  Map<String, Object> parkVehicle(String licensePlate);
 
-  String processPayment(String licensePlateJson);
+  Map<String, Object> processPayment(String licensePlate);
 
-  String processToLeave(String licensePlate);
+  Map<String, Object> processToLeave(String licensePlate);
   List<Vehicle> getAllVehicles();
 
-  void addMember(String memberInfoJson);
+  Map<String, Object> addMember(String licensePlate, MemberType memberType);
 
-  String deleteMember(String licensePlateJson);
+  Map<String, Object> deleteMember(String licensePlate);
 
   void checkMembershipEndTimes();
 
