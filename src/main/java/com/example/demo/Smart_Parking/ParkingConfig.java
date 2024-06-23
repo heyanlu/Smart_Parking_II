@@ -15,7 +15,7 @@ import java.util.List;
 
 @Configuration
 public class ParkingConfig {
-  public static final int TOTAL_CAPACITY = 500;
+  public static final int TOTAL_CAPACITY = 100;
 
   @Bean
   CommandLineRunner commandLineRunner(VehicleRepository vehicleRepository, ParkingLotRepository parkingLotRepository) {

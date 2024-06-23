@@ -21,4 +21,8 @@ public interface IParkingService {
   void checkMembershipEndTimes();
 
   List<Member> getAllMember();
+
+  int countOccupiedSpaces();
+
+  double calculateOccupiedPercentage();
 }

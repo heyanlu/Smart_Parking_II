@@ -1,5 +1,6 @@
 package com.example.demo.Smart_Parking.service;
 
+import com.example.demo.Smart_Parking.ParkingConfig;
 import com.example.demo.Smart_Parking.model.Member;
 import com.example.demo.Smart_Parking.model.MemberType;
 import com.example.demo.Smart_Parking.model.ParkingLot;
@@ -10,7 +11,6 @@ import com.example.demo.Smart_Parking.repository.VehicleRepository;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.stereotype.Service;
-import org.json.JSONObject;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +100,7 @@ public class ParkingService implements IParkingService{
         response.put("status", "success");
         response.put("duration", formattedDuration);
         response.put("fee", parkingFee);
-        response.put("message", paymentConfirmation);
+        response.put("message", paymentConfirmation + " Please leave wthin 20 minutes.");
       } else {
         response.put("status", "failure");
         response.put("message", "Payment processing failed. Please try again. ");
@@ -162,7 +162,7 @@ public class ParkingService implements IParkingService{
         }
         vehicleRepository.delete(vehicle);
         response.put("status", "success");
-        response.put("message", paymentConfirmation);
+        response.put("message", paymentConfirmation + " See you next time.");
 
       } else {
         response.put("status", "failure");
@@ -253,6 +253,24 @@ public class ParkingService implements IParkingService{
   @Override
   public List<Member> getAllMember() {
     return memberRepository.findAll();
+  }
+
+  @Override
+  public int countOccupiedSpaces() {
+    List<ParkingLot> parkingLots = parkingLotRepository.findAll();
+    int totalOccupiedSpaces = 0;
+    for (ParkingLot parkingLot : parkingLots) {
+      totalOccupiedSpaces += parkingLot.countOccupiedSpaces();
+    }
+    return totalOccupiedSpaces;
+  }
+
+  @Override
+  public double calculateOccupiedPercentage() {
+    List<ParkingLot> parkingLots = parkingLotRepository.findAll();
+    int totalSpaces = parkingLots.size() * ParkingConfig.TOTAL_CAPACITY;
+    int totalOccupiedSpaces = countOccupiedSpaces();
+    return (double) totalOccupiedSpaces / totalSpaces * 100.0;
   }
 
 

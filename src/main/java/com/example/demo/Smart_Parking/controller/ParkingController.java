@@ -81,4 +81,10 @@ public class ParkingController {
     return parkingService.getAllMember();
   }
 
+  @GetMapping("/occupied-percentage")
+  public ResponseEntity<Double> getOccupiedPercentage() {
+    double occupiedPercentage = parkingService.calculateOccupiedPercentage();
+    return ResponseEntity.ok(occupiedPercentage);
+  }
+
 }

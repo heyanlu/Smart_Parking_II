@@ -6,14 +6,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Entity
 @Table(name = "parking_lot")
 public class ParkingLot {
-  private static final Logger log = LoggerFactory.getLogger(ParkingLot.class);
-
   @Id
   @SequenceGenerator(
       name = "parking_lot_sequence",
@@ -71,5 +67,20 @@ public class ParkingLot {
       }
     }
     return -1;
+  }
+
+  public int countOccupiedSpaces() {
+    int occupiedCount = 0;
+    for (Boolean position : parkingPositions) {
+      if (position) {
+        occupiedCount++;
+      }
+    }
+    return occupiedCount;
+  }
+
+  public double calculateOccupiedPercentage() {
+    int occupiedCount = countOccupiedSpaces();
+    return (double) occupiedCount / parkingPositions.size() * 100.0;
   }
 }
