@@ -15,6 +15,11 @@
 The Parking Lot System is designed to handle both customer and administrator interactions, enabling management and usage of the parking facility. 
 Customers can park, pay, and leave the parking lot, while administrators can add members, and view all parked vehicles and members.
 
+#### Frontend code link 
+```bash
+https://github.com/heyanlu/Smart_Parking_II_Frontend
+```
+
 ### Skills and Structure
 
 ![Project Layout and Skills](https://github.com/heyanlu/Smart_Parking_II/assets/116776352/32bd272e-53a2-4071-a366-53fdf478b2ee)
