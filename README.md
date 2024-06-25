@@ -2,7 +2,7 @@
 
 - [Description](#description)
   - [About the Project](#about-the-project)
-  - [Skills and Structure](#skill-and-structure)
+  - [Buid with](#buid-with)
   - [Features](#features)
 - [Installation](#installation)
 - [Architecture](#architecture)
@@ -20,10 +20,13 @@ Customers can park, pay, and leave the parking lot, while administrators can add
 https://github.com/heyanlu/Smart_Parking_II_Frontend
 ```
 
-### Skills and Structure
-
-![Project Layout and Skills](https://github.com/heyanlu/Smart_Parking_II/assets/116776352/32bd272e-53a2-4071-a366-53fdf478b2ee)
-
+### Build with
+- Java
+- Spring boot
+- PostgreSQL
+- React
+- JavaScript
+- Material UI
 
 ### Features
 
@@ -106,7 +109,14 @@ npm run dev
 
 Once the frontend application has started successfully, you can access it at the local host .
 
-## Architecture
+## Architect
+
+![Project Layout and Skills](https://github.com/heyanlu/Smart_Parking_II/assets/116776352/7d6febd7-9060-481e-98ec-bc447a4afb80)
+
+Backend Architect
+![Project Layout and Skills](https://github.com/heyanlu/Smart_Parking_II/assets/116776352/7d6febd7-9060-481e-98ec-bc447a4afb80)
+ure
+
 ![Project Structure in Detail](https://github.com/heyanlu/Smart_Parking_II/assets/116776352/5779d878-5425-4809-a9c2-bd765ec7f779)
 
 ## Technical Stacks
