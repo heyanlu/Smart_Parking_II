@@ -114,9 +114,6 @@ Once the frontend application has started successfully, you can access it at the
 ![Project Layout and Skills](https://github.com/heyanlu/Smart_Parking_II/assets/116776352/7d6febd7-9060-481e-98ec-bc447a4afb80)
 
 Backend Architect
-![Project Layout and Skills](https://github.com/heyanlu/Smart_Parking_II/assets/116776352/7d6febd7-9060-481e-98ec-bc447a4afb80)
-ure
-
 ![Project Structure in Detail](https://github.com/heyanlu/Smart_Parking_II/assets/116776352/5779d878-5425-4809-a9c2-bd765ec7f779)
 
 ## Technical Stacks
