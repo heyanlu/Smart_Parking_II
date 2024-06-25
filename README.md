@@ -42,10 +42,7 @@ Administrator Side
 
 #### Demo
 ```bash
-https://northeastern.zoom.us/rec/share/cSDw0ex5NxXTJsnVPeDEEH-X38HoVOjs5o5eHv4dZBplYnAkA01BaWnDyx7AlMTQ.DV91vg9UDyia8nai?startTime=1719279196000
-```
-```bash
-Passcode: P%nUW6z#
+https://ylhe-demo.s3.us-east-2.amazonaws.com/GMT20240625-013316_Recording_1312x848.mp4
 ```
 
 ## Installation
