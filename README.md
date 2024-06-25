@@ -37,6 +37,14 @@ Administrator Side
 - View Parked Vehicles: Comprehensive view of all vehicles currently parked in the lot.
 - View Members: Access to the list of all members.
 
+#### Demo
+```bash
+https://northeastern.zoom.us/rec/share/cSDw0ex5NxXTJsnVPeDEEH-X38HoVOjs5o5eHv4dZBplYnAkA01BaWnDyx7AlMTQ.DV91vg9UDyia8nai?startTime=1719279196000
+```
+```bash
+Passcode: P%nUW6z#
+```
+
 ## Installation
 
 ### Prerequisites
