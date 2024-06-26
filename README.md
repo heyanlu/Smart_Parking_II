@@ -27,6 +27,7 @@ https://github.com/heyanlu/Smart_Parking_II_Frontend
 - React
 - JavaScript
 - Material UI
+- Postman
 
 ### Features
 
