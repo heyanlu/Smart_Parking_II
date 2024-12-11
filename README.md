@@ -41,11 +41,6 @@ Administrator Side
 - View Parked Vehicles: Comprehensive view of all vehicles currently parked in the lot.
 - View Members: Access to the list of all members.
 
-#### Demo
-```bash
-https://ylhe-demo.s3.us-east-2.amazonaws.com/GMT20240625-013316_Recording_1312x848.mp4
-```
-
 ## Installation
 
 ### Prerequisites
